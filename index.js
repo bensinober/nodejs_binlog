@@ -23,7 +23,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('Trouble in paradise!');  
     } else {
-      const html = content.toString().replace('__HOST__', host) // replace websocket host inline
+      const html = content.toString().replace('__WEBSOCKET__', `ws://${host}:${port}`) // replace websocket host inline
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(html, 'utf-8');
     }

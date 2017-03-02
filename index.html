@@ -17,7 +17,7 @@
     </style>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        let ws = new WebSocket("ws://__HOST__:8001/")
+        let ws = new WebSocket("__WEBSOCKET__")
         ws.onmessage = (e) => {
           console.log(e.data)
           const data = JSON.parse(e.data)
