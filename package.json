@@ -1,0 +1,16 @@
+{
+  "name": "nodejs_binlog",
+  "version": "1.0.0",
+  "description": "Simple trace of mysql binlog",
+  "main": "./index.js",
+  "scripts": {
+  	"start": "node ./index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+"dependencies": {
+  "zongji": "0.4.4",
+  "websocket": "1.0.24"
+},
+  "author": "Benjamin Rokseth",
+  "license": "ISC"
+}
