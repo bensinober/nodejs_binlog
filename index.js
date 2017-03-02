@@ -7,6 +7,8 @@ const fs = require('fs');
 const path = require('path');
 
 const port = process.env.PORT || 8001
+const host = process.env.HOST || 'localhost'
+
 /* replication master */
 const mysql_host = process.env.MYSQL_HOST || '127.0.0.1'
 const mysql_user = process.env.MYSQL_USER || 'root'
@@ -21,11 +23,12 @@ const server = http.createServer((req, res) => {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('Trouble in paradise!');  
     } else {
+      const html = content.toString().replace('__HOST__', host) // replace websocket host inline
       res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(content, 'utf-8');
+      res.end(html, 'utf-8');
     }
   })
-}).listen(port, null, () => { console.log("http server listening on :" + port) })
+}).listen(port, null, () => { console.log(`http server listening on ${host}:${port}`) })
 
 /* Very simple websocket server attached to server*/
 const wsServer = new wss({
