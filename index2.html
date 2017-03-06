@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>nada</title>
+    <style>
+      * { list-style: none; }
+      .flex {
+        display: flex;
+      }
+      .event  { width: 250px; }
+      .fields { flex: 1; }
+
+    </style>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        let ws = new WebSocket("ws://localhost:8001/")
+        ws.onmessage = (e) => {
+          console.log(e.data)
+          const data = JSON.parse(e.data)
+          let div = document.getElementById("container")
+          div.innerHTML = div.innerHTML + 
+            "<div class=\"flex\">" +
+              "<div class=\"event\">" + data.event + "&nbsp;" + data.table + "</div>" +
+              "<div class=\"fields\">" + JSON.stringify(data.fields) + "</div>" +
+            "</div>"
+          window.scrollTo(0,document.body.scrollHeight)
+        }
+      })
+    </script>
+  </head>
+  <body>
+    <div id="container"><div>
+  </body>
+</html>
+

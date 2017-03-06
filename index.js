@@ -73,7 +73,7 @@ zongji.on('error', (err) => {
 zongji.start({
   startAtEnd: true, // or we'll likely get massive amounts of data ...
   includeEvents: ['tablemap', 'writerows', 'updaterows', 'deleterows'],
-  excludeSchema: { 'koha_name': ['sessions', 'action_logs', 'statistics']}
+  excludeSchema: { 'koha_name': ['sessions', 'action_logs', 'statistics', 'zebraqueue']}
 })
 
 process.on('SIGINT', function() {

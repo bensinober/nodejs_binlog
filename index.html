@@ -1,40 +1,145 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8">
-    <title>WebSocket Tracelog for mysql binlog</title>
-    <style>
-      .flex-row {
-        display: flex;
-        flex-direction: row;
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+     <meta charset="utf-8">
+     <style>
+       html, body, #map_canvas {
+         margin: 0;
+         padding: 0;
+         height: 100%;
+       }
+     </style>
+    <script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script src="https://cdn.rawgit.com/googlemaps/v3-utility-library/master/infobox/src/infobox.js"></script>
+    <script type="text/javascript">
+
+      let markers = []   // will be populated later by branches
+      const branches = [ // need array so branch index can batch markers index
+          { id: 'hutl', latlng: [59.91663200000001, 10.746371000000002], name: 'Hovedbiblioteket' },
+          { id: 'fmaj', latlng: [59.930717, 10.716361], name: 'Majorstuen' },
+          { id: 'fgry', latlng: [59.9208595, 10.7602126], name: 'Grünerløkka' },
+          { id: 'ftor', latlng: [59.93798329999999, 10.768275], name: 'Torshov' },
+          { id: 'ftoy', latlng: [59.9141056, 10.775629], name: 'Tøyen' },
+          { id: 'froa', latlng: [59.946461400000004, 10.643595], name: 'Røa' },
+          { id: 'flam', latlng: [59.8742779, 10.8113742], name: 'Lambertseter' },
+          { id: 'fopp', latlng: [59.8940175, 10.841231299999999], name: 'Oppsal' },
+          { id: 'fbje', latlng: [59.9425046, 10.8119712], name: 'Bjerke' },
+          { id: 'fbol', latlng: [59.8826369, 10.8441631], name: 'Bøler' },
+          { id: 'fnyd', latlng: [59.950564299999996, 10.762855499999999], name: 'Nydalen' },
+          { id: 'fnor', latlng: [59.9512012, 10.873721999999999], name: 'Nordtvet' },
+          { id: 'fsme', latlng: [59.93254299999999, 10.6827946], name: 'Smestad' },
+          { id: 'from', latlng: [59.963487900000004, 10.8924909], name: 'Romsås' },
+          { id: 'frmm', latlng: [59.967363600000006, 10.9144215], name: 'Rommen' },
+          { id: 'fsto', latlng: [59.962085699999996, 10.926027999999999], name: 'Stovner' },
+          { id: 'fhol', latlng: [59.835085, 10.794494], name: 'Holmlia' },
+          { id: 'fbjo', latlng: [59.8341743, 10.835163999999999], name: 'Bjørnholt' }
+      ]
+
+      function initialize() {
+
+        map = new google.maps.Map(document.getElementById('map_canvas'), {
+          zoom: 12,
+          center: new google.maps.LatLng(59.91663200000001, 10.746371000000002),
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          scrollwheel: false
+        })
+
+        infoWindow = new google.maps.InfoWindow({
+          content: "loading..."
+        })
+
+        // close any open infobox om map on click
+        google.maps.event.addListener(map, "click", (e) => { infoWindow.close() })
+
+        createMarkers(map, branches)
+
+        // dummy event signals
+        /*
+        setInterval( () => {
+          const n = Math.floor((Math.random() * 18) + 0)
+          console.log(`selecting random row: ${n}`)
+          handleEvent(branches[n].id, "WHOA")
+        }, 10000)
+        */
       }
-      .event {
-        flex: 1 250px;
+
+      function createMarkers(map, branches) {
+          branches.forEach(b => {
+            let mark = new google.maps.Marker({
+              position: new google.maps.LatLng(b.latlng[0],b.latlng[1]),
+              map: map,
+              title: b.name,
+              html: `<p>${b.id}</p>`
+            })
+            markers.push(mark)
+            // remove this event
+            google.maps.event.addListener(mark, "click", (m) => {
+              infoWindow.setContent(`<p>Du klikka ${b.id}!</p>`)
+              infoWindow.open(map, mark)
+              setTimeout( () => {
+                infoWindow.close()
+              }, 1000)
+            })
+        })
       }
-      .fields {
-        flex: 1;
+
+      function handleEvent(id, message) {
+        const mark = getMarkerByBranch(id)
+        mark.setAnimation(google.maps.Animation.BOUNCE);
+        infoWindow.setContent(`<p>${id}: ${message}</p>`)
+        infoWindow.open(map, mark)
+        setTimeout( () => {
+          infoWindow.close()
+          mark.setAnimation(null);
+        }, 3000)
       }
-    </style>
-    <script>
+
+      function getMarkerByBranch(id) {
+        const idx = branches.findIndex(b => b.id === id)
+        return markers[idx]
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+
+      // websocket handler
       document.addEventListener("DOMContentLoaded", () => {
-        let ws = new WebSocket("__WEBSOCKET__")
+        const ws = new WebSocket("ws://localhost:8001")
         ws.onmessage = (e) => {
           console.log(e.data)
           const data = JSON.parse(e.data)
-          let div = document.getElementById("container")
-          div.innerHTML = div.innerHTML + 
-            "<div class=\"flex-row\">" +
-              "<div class=\"event\">" + data.event + "&nbsp;" + data.table + "</div>" +
-              "<div class=\"fields\">" + JSON.stringify(data.fields) + "</div>" +
-            "</div>"
-          window.scrollTo(0,document.body.scrollHeight)
+          switch (data.table) {
+          case "issues":
+            switch (data.event) {
+            case "writerows":
+              handleEvent(data.fields.branchcode, `utlånt ex ${data.fields.itemnumber}`)
+              break
+            case "deleterows":
+              handleEvent(data.fields.branchcode, `levert ex ${data.fields.itemnumber}`)
+              break
+            }
+            default:
+              break
+          case "reserves":
+            switch (data.event) {
+            case "writerows":
+              handleEvent(data.fields.branchcode, `res ${data.fields.reserve_id} på biblio ${data.fields.biblionumber}`)
+              break
+            case "updaterows":
+              if (data.fields.found === "T") {
+                handleEvent(data.fields.branchcode, `res ${data.fields.reserve_id} plukket ex ${data.fields.itemnumber} underveis`)
+              } else if (data.fields.found === "W") {
+                handleEvent(data.fields.branchcode, `res ${data.fields.reserve_id} til avhenting ${data.fields.pickupnumber}`)
+              }
+              break
+            }
+          }
         }
       })
     </script>
   </head>
+
   <body>
-    <h2>Mysql binlog trace</h2>
-    <div id="container"><div>
+    <div id="map_canvas"></div>
   </body>
 </html>
-
