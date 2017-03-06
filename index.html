@@ -104,7 +104,7 @@
 
       // websocket handler
       document.addEventListener("DOMContentLoaded", () => {
-        const ws = new WebSocket("ws://localhost:8001")
+        const ws = new WebSocket("__WEBSOCKET__")
         ws.onmessage = (e) => {
           console.log(e.data)
           const data = JSON.parse(e.data)
