@@ -95,8 +95,34 @@
         }, 3000)
       }
 
+      function autoToBranch(id) {
+        const auto = {
+          autohb:   'hutl',
+          autobje:  'fbje',
+          autobjo:  'fbjo',
+          autoblr:  'fbol',
+          autofuru: 'ffur',
+          autogru:  'fgry',
+          autohol:  'fhol',
+          autolmb:  'flam',
+          automaj:  'fmaj',
+          autonor:  'fnor',
+          autonyd:  'fnyd',
+          autoopp:  'fopp',
+          autoromm: 'frmm',
+          autoroms: 'from',
+          autoroa:  'froa',
+          autosme:  'fsme',
+          autostv:  'fsto',
+          autotor:  'ftor',
+          autotoy:  'fgam'
+        }
+        return auto[id]
+      }
+
       function getMarkerByBranch(id) {
-        const idx = branches.findIndex(b => b.id === id)
+        const branch = autoToBranch(id) ? autoToBranch(id) : id
+        const idx = branches.findIndex(b => b.id === branch)
         return markers[idx]
       }
 
