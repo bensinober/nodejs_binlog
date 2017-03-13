@@ -10,12 +10,12 @@
          height: 100%;
        }
      </style>
-    <script src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry"></script>
     <script src="https://cdn.rawgit.com/googlemaps/v3-utility-library/master/infobox/src/infobox.js"></script>
     <script type="text/javascript">
 
       let markers = []   // will be populated later by branches
-      const branches = [ // need array so branch index can batch markers index
+      let branches = [ // need array so branch index can batch markers index
           { id: 'hutl', latlng: [59.91663200000001, 10.746371000000002], name: 'Hovedbiblioteket' },
           { id: 'fmaj', latlng: [59.930717, 10.716361], name: 'Majorstuen' },
           { id: 'fgry', latlng: [59.9208595, 10.7602126], name: 'Grünerløkka' },
@@ -38,6 +38,7 @@
 
       function initialize() {
 
+        // map global for testing
         map = new google.maps.Map(document.getElementById('map_canvas'), {
           zoom: 12,
           center: new google.maps.LatLng(59.91663200000001, 10.746371000000002),
@@ -82,6 +83,84 @@
               }, 1000)
             })
         })
+      }
+
+      function drawArc(from, to) {
+        let arcPts = []
+        const fromPos = getMarkerByBranch(from).getPosition()
+        const toPos   = getMarkerByBranch(to).getPosition()
+        const distance = google.maps.geometry.spherical.computeDistanceBetween(fromPos, toPos)
+        let radius = distance * 1 // 
+        const heading = google.maps.geometry.spherical.computeHeading(fromPos, toPos)
+        const modHeading = heading + 90
+        let sagitta = computeSagitta(radius, (distance / 2))
+        let midPoint = google.maps.geometry.spherical.interpolate(fromPos, toPos, 0.5)
+        let center = google.maps.geometry.spherical.computeOffset(midPoint, (radius - sagitta), modHeading)
+        const Heading1 = google.maps.geometry.spherical.computeHeading(center, fromPos)
+        const Heading2 = google.maps.geometry.spherical.computeHeading(center, toPos)
+        var i = 0;
+        while ((Heading1 + i) <= Heading2 || (Heading2 + i) <= Heading1) {
+          if (radius < 0) {
+              arcPts.push(google.maps.geometry.spherical.computeOffset(center, radius, Heading1 - i));
+          }
+          else {
+              arcPts.push(google.maps.geometry.spherical.computeOffset(center, radius, Heading1 + i));
+          }
+          i++;
+        }
+        return arcPts
+      }
+
+      function computeSagitta(radius, length){
+        // radius is radius of circle. length is half between coords
+        return (radius - (Math.sqrt((radius * radius) - (length * length))))
+      }
+
+      function animateLine(dep, arr, message) {
+        const depMark = getMarkerByBranch(dep)
+        const arrMark = getMarkerByBranch(arr)
+        const fromPos = depMark.getPosition()
+        const toPos   = arrMark.getPosition()
+        const coords = drawArc(dep, arr)
+
+        let arrowSymbol = {
+          scale: 4,
+          strokeColor: '#393',
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+        }
+
+        let line = new google.maps.Polyline({
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          strokeColor: '#f00',
+          path: coords,
+          icons: [{
+            icon: arrowSymbol,
+            offset: '100%'
+          }],
+          map: map
+        })
+
+        let count = 0
+        window.setInterval(function() {
+          count = (count + 1) % 200
+
+          let icons = line.get('icons')
+          icons[0].offset = (count / 2) + '%'
+          line.set('icons', icons)
+        }, 3)
+
+        depMark.setAnimation(google.maps.Animation.BOUNCE)
+        arrMark.setAnimation(google.maps.Animation.BOUNCE)
+        infoWindow.setContent(`<p>bob: ${message}</p>`)
+        infoWindow.open(map, depMark)
+
+        setTimeout( () => {
+          infoWindow.close()
+          depMark.setAnimation(null)
+          arrMark.setAnimation(null)
+          line.setMap(null)
+        }, 3000)
       }
 
       function handleEvent(id, message) {
