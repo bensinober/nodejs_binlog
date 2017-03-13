@@ -85,12 +85,12 @@
         })
       }
 
-      function drawArc(from, to) {
+      function drawArc(fromPos, toPos) {
         let arcPts = []
-        const fromPos = getMarkerByBranch(from).getPosition()
-        const toPos   = getMarkerByBranch(to).getPosition()
+        //const fromPos = getMarkerByBranch(from).getPosition()
+        //const toPos   = getMarkerByBranch(to).getPosition()
         const distance = google.maps.geometry.spherical.computeDistanceBetween(fromPos, toPos)
-        let radius = distance * 1 // 
+        let radius = distance * 1 // keep arc radius == distance for now
         const heading = google.maps.geometry.spherical.computeHeading(fromPos, toPos)
         const modHeading = heading + 90
         let sagitta = computeSagitta(radius, (distance / 2))
@@ -121,7 +121,7 @@
         const arrMark = getMarkerByBranch(arr)
         const fromPos = depMark.getPosition()
         const toPos   = arrMark.getPosition()
-        const coords = drawArc(dep, arr)
+        const coords = drawArc(fromPos, toPos)
 
         let arrowSymbol = {
           scale: 4,
@@ -163,15 +163,18 @@
         }, 3000)
       }
 
-      function handleEvent(id, message) {
-        const mark = getMarkerByBranch(id)
+      function handleEvent(msgId, branch, tobranch, message) {
+        const mark = getMarkerByBranch(branch)
         mark.setAnimation(google.maps.Animation.BOUNCE);
-        infoWindow.setContent(`<p>${id}: ${message}</p>`)
+        infoWindow.setContent(`<p>${msgId}: ${message}</p>`)
         infoWindow.open(map, mark)
         setTimeout( () => {
           infoWindow.close()
           mark.setAnimation(null);
         }, 3000)
+        if (msgId == 'TRANSFER') {
+          animateLine(branch, tobranch, message)
+        }
       }
 
       function autoToBranch(id) {
@@ -217,10 +220,10 @@
           case "issues":
             switch (data.event) {
             case "writerows":
-              handleEvent(data.fields.branchcode, `utlånt ex ${data.fields.itemnumber}`)
+              handleEvent('CHECKOUT', data.fields.branchcode, null, `utlånt ex ${data.fields.itemnumber}`)
               break
             case "deleterows":
-              handleEvent(data.fields.branchcode, `levert ex ${data.fields.itemnumber}`)
+              handleEvent('RETURN', data.fields.branchcode, null, `levert ex ${data.fields.itemnumber}`)
               break
             }
             default:
@@ -228,14 +231,23 @@
           case "reserves":
             switch (data.event) {
             case "writerows":
-              handleEvent(data.fields.branchcode, `res ${data.fields.reserve_id} på biblio ${data.fields.biblionumber}`)
+              handleEvent('RESERVE', data.fields.branchcode, null, `res ${data.fields.reserve_id} på biblio ${data.fields.biblionumber}`)
               break
             case "updaterows":
               if (data.fields.found === "T") {
-                handleEvent(data.fields.branchcode, `res ${data.fields.reserve_id} plukket ex ${data.fields.itemnumber} underveis`)
+                handleEvent('RESERVEFOUND', data.fields.branchcode, null, `res ${data.fields.reserve_id} plukket ex ${data.fields.itemnumber} underveis`)
               } else if (data.fields.found === "W") {
-                handleEvent(data.fields.branchcode, `res ${data.fields.reserve_id} til avhenting ${data.fields.pickupnumber}`)
+                handleEvent('RESERVEREADY', data.fields.branchcode, null, `res ${data.fields.reserve_id} til avhenting ${data.fields.pickupnumber}`)
               }
+              break
+            }
+          case "branchtransfers":
+            switch (data.event) {
+            case "writerows":
+              handleEvent('TRANSFER', data.fields.frombranch, `start branchtransfer ex ${data.fields.itemnumber} fra ${data.fields.frombranch} til ${data.fields.tobranch}`)
+              break
+            case "updaterows":
+              handleEvent('TRANSFER', data.fields.tobranch, `branchtransfer ankommet ex ${data.fields.itemnumber} fra ${data.fields.frombranch}`)
               break
             }
           }
