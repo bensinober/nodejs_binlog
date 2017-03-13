@@ -148,7 +148,7 @@
           let icons = line.get('icons')
           icons[0].offset = (count / 2) + '%'
           line.set('icons', icons)
-        }, 3)
+        }, 10)
 
         depMark.setAnimation(google.maps.Animation.BOUNCE)
         arrMark.setAnimation(google.maps.Animation.BOUNCE)
@@ -235,7 +235,7 @@
               break
             case "updaterows":
               if (data.fields.found === "T") {
-                handleEvent('RESERVEFOUND', data.fields.branchcode, null, `res ${data.fields.reserve_id} plukket ex ${data.fields.itemnumber} underveis`)
+                handleEvent('RESERVEFOUND', data.fields.after.branchcode, null, `res ${data.fields.after.reserve_id} plukket ex ${data.fields.after.itemnumber} underveis`)
               } else if (data.fields.found === "W") {
                 handleEvent('RESERVEREADY', data.fields.branchcode, null, `res ${data.fields.reserve_id} til avhenting ${data.fields.pickupnumber}`)
               }
@@ -244,10 +244,10 @@
           case "branchtransfers":
             switch (data.event) {
             case "writerows":
-              handleEvent('TRANSFER', data.fields.frombranch, `start branchtransfer ex ${data.fields.itemnumber} fra ${data.fields.frombranch} til ${data.fields.tobranch}`)
+              handleEvent('TRANSFER', data.fields.frombranch, data.fields.tobranch, `start branchtransfer ex ${data.fields.itemnumber} fra ${data.fields.frombranch} til ${data.fields.tobranch}`)
               break
             case "updaterows":
-              handleEvent('TRANSFER', data.fields.tobranch, `branchtransfer ankommet ex ${data.fields.itemnumber} fra ${data.fields.frombranch}`)
+              handleEvent('TRANSFER', data.fields.after.frombranch, data.fields.after.tobranch, `branchtransfer ankommet ex ${data.fields.after.itemnumber} fra ${data.fields.after.frombranch}`)
               break
             }
           }
