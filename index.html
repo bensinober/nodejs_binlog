@@ -46,12 +46,8 @@
           scrollwheel: false
         })
 
-        infoWindow = new google.maps.InfoWindow({
-          content: "loading..."
-        })
-
         // close any open infobox om map on click
-        google.maps.event.addListener(map, "click", (e) => { infoWindow.close() })
+        // google.maps.event.addListener(map, "click", (e) => { infoWindow.close() })
 
         createMarkers(map, branches)
 
@@ -71,16 +67,22 @@
               position: new google.maps.LatLng(b.latlng[0],b.latlng[1]),
               map: map,
               title: b.name,
-              html: `<p>${b.id}</p>`
+              html: `<h3>${b.id}</h3>` // unused
+            })
+            let infoWindow = new google.maps.InfoWindow({
+              content: "loading..."
             })
             markers.push(mark)
             // remove this event
-            google.maps.event.addListener(mark, "click", (m) => {
-              infoWindow.setContent(`<p>Du klikka ${b.id}!</p>`)
+            google.maps.event.addListener(mark, "click", (latLng) => {
+              console.log(mark)
+              let infoWindow = new google.maps.InfoWindow({
+                content: `<p>Du klikka på ${b.id}!</p>`
+              })
               infoWindow.open(map, mark)
               setTimeout( () => {
                 infoWindow.close()
-              }, 1000)
+              }, 3000)
             })
         })
       }
@@ -152,11 +154,8 @@
 
         depMark.setAnimation(google.maps.Animation.BOUNCE)
         arrMark.setAnimation(google.maps.Animation.BOUNCE)
-        infoWindow.setContent(`<p>bob: ${message}</p>`)
-        infoWindow.open(map, depMark)
 
         setTimeout( () => {
-          infoWindow.close()
           depMark.setAnimation(null)
           arrMark.setAnimation(null)
           line.setMap(null)
@@ -166,7 +165,9 @@
       function handleEvent(msgId, branch, tobranch, message) {
         const mark = getMarkerByBranch(branch)
         mark.setAnimation(google.maps.Animation.BOUNCE);
-        infoWindow.setContent(`<p>${msgId}: ${message}</p>`)
+        let infoWindow = new google.maps.InfoWindow({
+          content: `<p>${msgId}: ${message}</p>`
+        })
         infoWindow.open(map, mark)
         setTimeout( () => {
           infoWindow.close()
@@ -237,7 +238,7 @@
               if (data.fields.found === "T") {
                 handleEvent('RESERVEFOUND', data.fields.after.branchcode, null, `res ${data.fields.after.reserve_id} plukket ex ${data.fields.after.itemnumber} underveis`)
               } else if (data.fields.found === "W") {
-                handleEvent('RESERVEREADY', data.fields.branchcode, null, `res ${data.fields.reserve_id} til avhenting ${data.fields.pickupnumber}`)
+                handleEvent('RESERVEREADY', data.fields.after.branchcode, null, `res ${data.fields.after.reserve_id} til avhenting med hentenummer ${data.fields.after.pickupnumber}`)
               }
               break
             }
