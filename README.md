@@ -12,5 +12,6 @@ Env vars
 
 PORT       : port for server and websocket to listen on
 MYSQL_HOST : host with mysql binlog with ROW logs enabled
+MYSQL_PORT : port to mysql host
 MYSQL_USER : username with replication permissions
 MYSQL_PASS : password of above

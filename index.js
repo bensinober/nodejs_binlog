@@ -11,6 +11,7 @@ const host = process.env.HOST || 'localhost'
 
 /* replication master */
 const mysql_host = process.env.MYSQL_HOST || '127.0.0.1'
+const mysql_port = process.env.MYSQL_PORT || 3306
 const mysql_user = process.env.MYSQL_USER || 'root'
 const mysql_pass = process.env.MYSQL_PASS || 'secret'
 
@@ -21,7 +22,7 @@ const server = http.createServer((req, res) => {
   fs.readFile('./index.html', (err, content) => {
     if (err) {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Trouble in paradise!');  
+      res.end('Trouble in paradise!');
     } else {
       const html = content.toString().replace('__WEBSOCKET__', `ws://${host}:${port}`) // replace websocket host inline
       res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -41,10 +42,11 @@ wsServer.on("request", (req) => {
 })
 
 /* mysql replicator listener */
-const zongji = new ZongJi({ 
+const zongji = new ZongJi({
   host     : mysql_host,
+  port     : mysql_port,
   user     : mysql_user,
-  password : mysql_pass 
+  password : mysql_pass
 });
 
 // Each change to the replication log results in an event
