@@ -16,24 +16,26 @@
 
       let markers = []   // will be populated later by branches
       let branches = [ // need array so branch index can batch markers index
-          { id: 'hutl', latlng: [59.91663200000001, 10.746371000000002], name: 'Hovedbiblioteket' },
-          { id: 'fmaj', latlng: [59.930717, 10.716361], name: 'Majorstuen' },
-          { id: 'fgry', latlng: [59.9208595, 10.7602126], name: 'Grünerløkka' },
-          { id: 'ftor', latlng: [59.93798329999999, 10.768275], name: 'Torshov' },
-          { id: 'ftoy', latlng: [59.9141056, 10.775629], name: 'Tøyen' },
-          { id: 'froa', latlng: [59.946461400000004, 10.643595], name: 'Røa' },
-          { id: 'flam', latlng: [59.8742779, 10.8113742], name: 'Lambertseter' },
-          { id: 'fopp', latlng: [59.8940175, 10.841231299999999], name: 'Oppsal' },
           { id: 'fbje', latlng: [59.9425046, 10.8119712], name: 'Bjerke' },
+          { id: 'fbjo', latlng: [59.8341743, 10.835163999999999], name: 'Bjørnholt' },
           { id: 'fbol', latlng: [59.8826369, 10.8441631], name: 'Bøler' },
-          { id: 'fnyd', latlng: [59.950564299999996, 10.762855499999999], name: 'Nydalen' },
+          { id: 'fgam', latlng: [59.9141056, 10.775629], name: 'Tøyen (Gamle Oslo)' },
+          { id: 'fhol', latlng: [59.835085, 10.794494], name: 'Holmlia' },
+          { id: 'ffur', latlng: [59.9417006, 10.8974805,15], name: 'Furuset' },
+          { id: 'fgry', latlng: [59.9208595, 10.7602126], name: 'Grünerløkka' },
+          { id: 'flam', latlng: [59.8742779, 10.8113742], name: 'Lambertseter' },
+          { id: 'fmaj', latlng: [59.930717, 10.716361], name: 'Majorstuen' },
+          { id: 'fopp', latlng: [59.8940175, 10.841231299999999], name: 'Oppsal' },
           { id: 'fnor', latlng: [59.9512012, 10.873721999999999], name: 'Nordtvet' },
-          { id: 'fsme', latlng: [59.93254299999999, 10.6827946], name: 'Smestad' },
+          { id: 'fnyd', latlng: [59.950564299999996, 10.762855499999999], name: 'Nydalen' },
+          { id: 'frik', latlng: [59.9474592, 10.7122266,17], name: 'Riksen' },
+          { id: 'froa', latlng: [59.946461400000004, 10.643595], name: 'Røa' },
           { id: 'from', latlng: [59.963487900000004, 10.8924909], name: 'Romsås' },
           { id: 'frmm', latlng: [59.967363600000006, 10.9144215], name: 'Rommen' },
+          { id: 'fsme', latlng: [59.93254299999999, 10.6827946], name: 'Smestad' },
           { id: 'fsto', latlng: [59.962085699999996, 10.926027999999999], name: 'Stovner' },
-          { id: 'fhol', latlng: [59.835085, 10.794494], name: 'Holmlia' },
-          { id: 'fbjo', latlng: [59.8341743, 10.835163999999999], name: 'Bjørnholt' }
+          { id: 'ftor', latlng: [59.93798329999999, 10.768275], name: 'Torshov' },
+          { id: 'hutl', latlng: [59.91663200000001, 10.746371000000002], name: 'Hovedbiblioteket' }
       ]
 
       function initialize() {
